@@ -25,12 +25,12 @@ if(MSVC)
 		endif()
 
 		target_link_options(${project_name} PRIVATE /PROFILE)
-		add_custom_command(
-			TARGET ${project_name} POST_BUILD
-			COMMENT "Instrument and Collect ${project_name}.exe"
-			COMMAND ${MSVC_CODECOVERAGE_CONSOLE_EXE} instrument Debug\\${project_name}.exe -s ..\\..\\test\\coverage.runsettings
-			COMMAND ${MSVC_CODECOVERAGE_CONSOLE_EXE} collect Debug\\${project_name}.exe -o Debug\\coverage.msvc -f cobertura -s ..\\..\\test\\coverage.runsettings
-		)
+		# add_custom_command(
+		# 	TARGET ${project_name} POST_BUILD
+		# 	COMMENT "Instrument and Collect ${project_name}.exe"
+		# 	COMMAND ${MSVC_CODECOVERAGE_CONSOLE_EXE} instrument Debug\\${project_name}.exe -s ..\\..\\test\\coverage.runsettings
+		# 	COMMAND ${MSVC_CODECOVERAGE_CONSOLE_EXE} collect Debug\\${project_name}.exe -o Debug\\coverage.msvc -f cobertura -s ..\\..\\test\\coverage.runsettings
+		# )
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_compile_options(${project_name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
 		target_compile_options(${lib_name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
@@ -40,42 +40,42 @@ if(MSVC)
 		target_link_directories(${project_name} PRIVATE "${CMAKE_CXX_COMPILER_PATH}\\..\\lib\\clang\\${CMAKE_CXX_COMPILER_VERSION}\\lib\\windows\\")
 
 
-		add_custom_command( 
-		 	TARGET ${project_name} POST_BUILD
-		 	COMMENT "Run ${project_name}.exe"
-			COMMAND Powershell.exe Invoke-WebRequest -Uri https://github.com/mozilla/grcov/releases/download/v0.8.13/grcov-x86_64-pc-windows-msvc.zip -OutFile ./Debug/grcov-x86_64-pc-windows-msvc.zip
-			COMMAND Powershell.exe Expand-Archive -Path ./Debug/grcov-x86_64-pc-windows-msvc.zip -DestinationPath ./Debug/
-		 	COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE="${lib_name}.profraw" ./Debug/${project_name}.exe
-			COMMAND ${CMAKE_CXX_COMPILER_PATH}/llvm-profdata merge -sparse ${lib_name}.profraw -o ${lib_name}.profdata
-			COMMAND ./Debug/grcov.exe --llvm -t html -b ./Debug/ -s ./../../
-					--llvm-path ${CMAKE_CXX_COMPILER_PATH}
-					--branch
-					--keep-only "src/*" 
-					#--keep-only "test/*" 
-					#--ignore "test/misc/*" 
-					--excl-start "^.*LCOV_EXCL_START.*" 
-					--excl-stop "^.*LCOV_EXCL_STOP.*" 
-					--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
-					--excl-br-start "^.*LCOV_EXCL_START.*" 
-					--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
-					--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
-					-o windows
-					..
-			COMMAND ./Debug/grcov.exe --llvm -t lcov -b ./Debug/ -s ./../../
-					--llvm-path ${CMAKE_CXX_COMPILER_PATH}
-					--branch
-					--keep-only "src/*"
-					#--keep-only "test/*" 
-					#--ignore "test/misc/*" 
-					--excl-start "^.*LCOV_EXCL_START.*" 
-					--excl-stop "^.*LCOV_EXCL_STOP.*" 
-					--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
-					--excl-br-start "^.*LCOV_EXCL_START.*" 
-					--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
-					--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
-					-o coverage.windows.lcov.info
-					..
-		)
+		# add_custom_command( 
+		#  	TARGET ${project_name} POST_BUILD
+		#  	COMMENT "Run ${project_name}.exe"
+		# 	COMMAND Powershell.exe Invoke-WebRequest -Uri https://github.com/mozilla/grcov/releases/download/v0.8.13/grcov-x86_64-pc-windows-msvc.zip -OutFile ./Debug/grcov-x86_64-pc-windows-msvc.zip
+		# 	COMMAND Powershell.exe Expand-Archive -Path ./Debug/grcov-x86_64-pc-windows-msvc.zip -DestinationPath ./Debug/
+		#  	COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE="${lib_name}.profraw" ./Debug/${project_name}.exe
+		# 	COMMAND ${CMAKE_CXX_COMPILER_PATH}/llvm-profdata merge -sparse ${lib_name}.profraw -o ${lib_name}.profdata
+		# 	COMMAND ./Debug/grcov.exe --llvm -t html -b ./Debug/ -s ./../../
+		# 			--llvm-path ${CMAKE_CXX_COMPILER_PATH}
+		# 			--branch
+		# 			--keep-only "src/*" 
+		# 			#--keep-only "test/*" 
+		# 			#--ignore "test/misc/*" 
+		# 			--excl-start "^.*LCOV_EXCL_START.*" 
+		# 			--excl-stop "^.*LCOV_EXCL_STOP.*" 
+		# 			--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
+		# 			--excl-br-start "^.*LCOV_EXCL_START.*" 
+		# 			--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
+		# 			--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
+		# 			-o windows
+		# 			..
+		# 	COMMAND ./Debug/grcov.exe --llvm -t lcov -b ./Debug/ -s ./../../
+		# 			--llvm-path ${CMAKE_CXX_COMPILER_PATH}
+		# 			--branch
+		# 			--keep-only "src/*"
+		# 			#--keep-only "test/*" 
+		# 			#--ignore "test/misc/*" 
+		# 			--excl-start "^.*LCOV_EXCL_START.*" 
+		# 			--excl-stop "^.*LCOV_EXCL_STOP.*" 
+		# 			--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
+		# 			--excl-br-start "^.*LCOV_EXCL_START.*" 
+		# 			--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
+		# 			--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
+		# 			-o coverage.windows.lcov.info
+		# 			..
+		# )
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_compile_options(${project_name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
@@ -83,40 +83,40 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_compile_options(${lib_name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
 	target_link_options(${lib_name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
 
-	add_custom_command(
-		TARGET ${project_name} POST_BUILD
-		COMMENT "Run ${project_name}.exe"
-		COMMAND curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-x86_64-unknown-linux-gnu.tar.bz2 | tar jxf -
-		COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE="${lib_name}.profraw" ./${project_name}
-		COMMAND llvm-profdata merge -sparse ${lib_name}.profraw -o ${lib_name}.profdata
-		COMMAND ./grcov --llvm -t html -b . -s ./../../
-				--llvm-path /usr/bin/
-				--branch
-				--keep-only "src/*" 
-				#--keep-only "test/*" 
-				#--ignore "test/misc/*" 
-				--excl-start "^.*LCOV_EXCL_START.*" 
-				--excl-stop "^.*LCOV_EXCL_STOP.*" 
-				--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
-				--excl-br-start "^.*LCOV_EXCL_START.*" 
-				--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
-				--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
-				-o ubuntu
-				..
-		COMMAND ./grcov --llvm -t lcov -b . -s ./../../
-				--llvm-path /usr/bin/
-				--branch
-				--keep-only "src/*"
-				#--keep-only "test/*" 
-				#--ignore "test/misc/*" 
-				--excl-start "^.*LCOV_EXCL_START.*" 
-				--excl-stop "^.*LCOV_EXCL_STOP.*" 
-				--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
-				--excl-br-start "^.*LCOV_EXCL_START.*" 
-				--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
-				--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
-				-o coverage.ubuntu.lcov.info
-				..
-	)
+	# add_custom_command(
+	# 	TARGET ${project_name} POST_BUILD
+	# 	COMMENT "Run ${project_name}.exe"
+	# 	COMMAND curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-x86_64-unknown-linux-gnu.tar.bz2 | tar jxf -
+	# 	COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE="${lib_name}.profraw" ./${project_name}
+	# 	COMMAND llvm-profdata merge -sparse ${lib_name}.profraw -o ${lib_name}.profdata
+	# 	COMMAND ./grcov --llvm -t html -b . -s ./../../
+	# 			--llvm-path /usr/bin/
+	# 			--branch
+	# 			--keep-only "src/*" 
+	# 			#--keep-only "test/*" 
+	# 			#--ignore "test/misc/*" 
+	# 			--excl-start "^.*LCOV_EXCL_START.*" 
+	# 			--excl-stop "^.*LCOV_EXCL_STOP.*" 
+	# 			--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
+	# 			--excl-br-start "^.*LCOV_EXCL_START.*" 
+	# 			--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
+	# 			--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
+	# 			-o ubuntu
+	# 			..
+	# 	COMMAND ./grcov --llvm -t lcov -b . -s ./../../
+	# 			--llvm-path /usr/bin/
+	# 			--branch
+	# 			--keep-only "src/*"
+	# 			#--keep-only "test/*" 
+	# 			#--ignore "test/misc/*" 
+	# 			--excl-start "^.*LCOV_EXCL_START.*" 
+	# 			--excl-stop "^.*LCOV_EXCL_STOP.*" 
+	# 			--excl-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_LINE.*)\"" 
+	# 			--excl-br-start "^.*LCOV_EXCL_START.*" 
+	# 			--excl-br-stop "^.*LCOV_EXCL_STOP.*" 
+	# 			--excl-br-line "\"(\\s*^.*GTEST_TEST\\.*)|(^.*LCOV_EXCL_BR_LINE.*)\"" 
+	# 			-o coverage.ubuntu.lcov.info
+	# 			..
+	# )
 endif()
 endfunction()
