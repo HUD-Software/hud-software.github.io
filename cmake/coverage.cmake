@@ -39,6 +39,7 @@ if(MSVC)
 		get_filename_component(CMAKE_CXX_COMPILER_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
 		target_link_directories(${project_name} PRIVATE "${CMAKE_CXX_COMPILER_PATH}\\..\\lib\\clang\\${CMAKE_CXX_COMPILER_VERSION}\\lib\\windows\\")
 
+		set_property(TEST ${project_name} PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=${lib_name}.profraw")
 
 		# add_custom_command( 
 		#  	TARGET ${project_name} POST_BUILD
